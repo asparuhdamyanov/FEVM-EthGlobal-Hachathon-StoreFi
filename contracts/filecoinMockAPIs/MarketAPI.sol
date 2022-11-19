@@ -10,9 +10,11 @@ import "./types/MarketTypes.sol";
 contract MarketAPI {
     mapping(string => uint256) balances;
     mapping(uint64 => MarketTypes.MockDeal) deals;
+    uint64 lastDealId;
 
     constructor() {
         mock_generate_deals();
+        lastDealId = 68;
     }
 
     /// @notice Deposits the received value into the balance held in escrow.
@@ -178,6 +180,25 @@ contract MarketAPI {
             )
         );
         require(success, "client contract failed to authorize deal publish");
+    }
+
+    function publish_deal(string memory client, string memory provider, uint256 price) public {
+        MarketTypes.MockDeal memory deal;
+        deal.id = lastDealId++;
+        deal.cid = "asdf6ea4seaqlkg6mss5qs56jqtajg5ycrhpkj2b66cgdkukf2qjmmzz6ayksuci";
+        deal.size = 8388608;
+        deal.verified = false;
+        deal.client = client;
+        deal.provider = provider;
+        deal.label = "mAXCg5AIg8YBXbFjtdBy1iZjpDYAwRSt0elGLF5GvTqulEii1VcM";
+        deal.start = 25245;
+        deal.end = 545150;
+        deal.price_per_epoch = price;
+        deal.provider_collateral = 0;
+        deal.client_collateral = 0;
+        deal.activated = 1;
+        deal.terminated = 0;
+        deals[lastDealId++] = deal;
     }
 
     /// @notice Adds mock deal data to the internal state of this mock.
