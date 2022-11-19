@@ -1,9 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
+import "../filecoinMockAPIs/MarketAPI.sol";
+
 error TransactionFailed();
 
 contract Auction {
+    address owner;
+    address marketApiAddress;
+    // for how many epochs will the storage be used
+    // for now it is hard coded, but could also be a part of the auction
+    // it is used to calculate the price per epoch
+    uint constant EPOCH_NUM = 545150 - 25245;
     address payable public beneficiary;
     uint256 public auctionEndTime;
     uint256 public auctionStartTime;
@@ -27,12 +35,16 @@ contract Auction {
     constructor(
         uint256 _biddingTime,
         address payable _beneficiary,
-        uint256 _minimumBid
+        uint256 _minimumBid,
+        address marketAddr,
+        address ownerAddr
     ) {
         beneficiary = _beneficiary;
         auctionEndTime = block.timestamp + _biddingTime;
         minimumBid = _minimumBid;
         auctionStartTime = block.timestamp;
+        marketApiAddress = marketAddr;
+        owner = ownerAddr;
         //auctionTimeDifference = auctionEndTime + 5 minutes;
     }
 
@@ -77,7 +89,19 @@ contract Auction {
         return true;
     }
 
-    function auctionEnd() public {
+
+    function forceEndAuction() public {
+        require (msg.sender == owner, "You are not allowed to force end the aution!");
+        require(
+            block.timestamp > auctionEndTime + 3 days,
+            "The Auction Cannot End Before The Specified Time"
+        );
+        ended = true;
+        emit auctionEnded(highestBidder, highestbid);
+    }
+
+    function endAuction() public {
+        require(msg.sender == beneficiary, "Only the beneficiary can end the auction.");
         require(
             block.timestamp > auctionEndTime,
             "The Auction Cannot End Before The Specified Time"
@@ -87,6 +111,14 @@ contract Auction {
         emit auctionEnded(highestBidder, highestbid);
         // @dev needs to invoke make a deal function
         beneficiary.transfer(highestbid);
+
+        string memory client = string(abi.encodePacked(highestBidder));
+        string memory provider = string(abi.encodePacked(beneficiary));
+
+        // make a deal whenever the FEVM syscalls are working
+        MarketAPI market = MarketAPI(marketApiAddress);
+        // market.publish_storage_deals(deal), highestBidder);
+        market.publish_deal(client, provider, highestbid / EPOCH_NUM);
     }
 
     function AuctionStartedTime() external view returns (uint256) {
