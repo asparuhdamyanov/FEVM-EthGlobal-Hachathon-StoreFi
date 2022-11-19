@@ -1,3 +1,5 @@
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, getDocs , Firestore, QuerySnapshot } from "firebase/firestore";
 import React, { Component, JSXElementConstructor, ReactElement } from "react";
 import { Input, TextField, Button, Grid } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
@@ -23,7 +25,28 @@ const boardListing = [
   },
 ];
 
+const firebaseConfig = {
+    apiKey: "AIzaSyC_pLy1L2OwUXXnkiV9ejDoXvc-CgYyN9M",
+    authDomain: "storefi.firebaseapp.com",
+    projectId: "storefi",
+    storageBucket: "storefi.appspot.com",
+    messagingSenderId: "203827032373",
+    appId: "1:203827032373:web:726017c96dbdbc6f4e9c7c",
+    measurementId: "G-5NEW7LBEKN"
+  };
+  
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  
+  const db = getFirestore(app);
+  
+  async function fetchAddresses() {
+      const addressesSnapshot = await getDocs(collection(db, 'addresses'))
+      console.log("there are " + addressesSnapshot.size + " addresses at the moment");
+  }
+
 function Board() {
+  fetchAddresses();
   return (
     <Grid className="container-grid" container spacing={1}>
       {boardListing.map((item, index) => {
