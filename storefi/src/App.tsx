@@ -7,8 +7,8 @@ import Board from './components/Board';
 function App() {
   return (
     <div>
-      <ListingCreation ></ListingCreation>
       <Board></Board>
+    <ListingCreation ></ListingCreation>
     </div>
   );
 }
