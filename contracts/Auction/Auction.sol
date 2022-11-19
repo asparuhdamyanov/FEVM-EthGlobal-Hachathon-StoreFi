@@ -89,11 +89,18 @@ contract Auction {
         beneficiary.transfer(highestbid);
     }
 
-    function started() external view returns (uint256) {
+    function AuctionStartedTime() external view returns (uint256) {
         return auctionStartTime;
     }
 
-    function ended() external view returns (uint256) {
+    function AuctionEndedTime() external view returns (uint256) {
         return auctionEndTime;
+    }
+
+    /* @notice Tracks whether the sale has finished
+     * @return bool A boolean showing whether the sale has finished
+     */
+    function finished() public view returns (bool) {
+        return block.number > auctionEndTime;
     }
 }
