@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
+error TransactionFailed();
+
 contract Auction {
     address payable public beneficiary;
     uint256 public auctionEndTime;
-
+    uint256 public auctionStartTime;
     // allows users to add a time difference between the last bid, if the time is near closure time is added
-    uint256 private auctionTimeDifference;
-
+    //uint256 private auctionTimeDifference;
 
     // current state of the auction
     address public highestBidder;
@@ -19,6 +20,9 @@ contract Auction {
 
     event highestBidIncreased(address bidder, uint256 amount);
     event auctionEnded(address winner, uint256 amount);
+    event Withdraw(address indexed withdrawer);
+
+    // event Bid(address indexed bidder);
 
     constructor(
         uint256 _biddingTime,
@@ -28,18 +32,15 @@ contract Auction {
         beneficiary = _beneficiary;
         auctionEndTime = block.timestamp + _biddingTime;
         minimumBid = _minimumBid;
-        auctionTimeDifference = auctionEndTime + 5 minutes;
+        auctionStartTime = block.timestamp;
+        //auctionTimeDifference = auctionEndTime + 5 minutes;
     }
 
     function bid() public payable {
         require(block.timestamp < auctionEndTime, "The Auction Time Is Over");
-        require(msg.value >= minimumBid, "Minimum Bid Required")
+        require(!ended, "Auction Ended");
+        require(msg.value >= minimumBid, "Minimum Bid Required");
         if (msg.value > highestbid) {
-            if (pendingReturns[msg.sender] > 0) {
-                uint256 amount = pendingReturns[msg.sender];
-                payable(msg.sender).transfer(amount);
-            }
-
             pendingReturns[msg.sender] = msg.value;
             highestBidder = msg.sender;
             highestbid = msg.value;
@@ -47,19 +48,32 @@ contract Auction {
         } else {
             revert("sorry, the bid is not high enough!");
         }
-       // if(auctionEndTime - block.timestamp)
+        // if(auctionEndTime - block.timestamp)
+    }
+
+    function withdrawBeforeEnd() public payable returns (bool) {
+        require(!ended, "You Cannot Withdraw When The Auction Has Ended");
+        uint256 _amount = pendingReturns[msg.sender];
+        require(_amount > 0, "Can't Return, you havent bid");
+        require(_amount * 5 <= highestbid, "Can't return, highest bid is not high enough");
+
+        payable(msg.sender).transfer(_amount);
+        emit Withdraw(msg.sender);
+        return true;
     }
 
     function withdraw() public payable returns (bool) {
         require(ended, "You Cannot Withdraw Until The Auction Has Ended");
-        uint256 amount = pendingReturns[msg.sender];
-        if (amount > 0) {
-            pendingReturns[msg.sender] = 0;
-        }
+        require(pendingReturns[msg.sender] != 0, "You have not bid");
 
-        if (!payable(msg.sender).send(amount)) {
-            pendingReturns[msg.sender] = amount;
-        }
+        uint256 _amount = pendingReturns[msg.sender];
+
+        pendingReturns[msg.sender] = 0;
+
+        (bool success, ) = msg.sender.call{value: _amount}("");
+        if (!success) revert TransactionFailed();
+        emit Withdraw(msg.sender);
+
         return true;
     }
 
@@ -71,6 +85,15 @@ contract Auction {
         if (ended) revert("the auction is already over!");
         ended = true;
         emit auctionEnded(highestBidder, highestbid);
+        // @dev needs to invoke make a deal function
         beneficiary.transfer(highestbid);
+    }
+
+    function started() external view returns (uint256) {
+        return auctionStartTime;
+    }
+
+    function ended() external view returns (uint256) {
+        return auctionEndTime;
     }
 }
