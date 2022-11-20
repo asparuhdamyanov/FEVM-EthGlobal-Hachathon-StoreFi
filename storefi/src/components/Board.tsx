@@ -44,7 +44,7 @@ const firebaseConfig = {
   
   async function fetchAddresses() {
       const addressesSnapshot = await getDocs(collection(db, 'addresses'))
-      console.log("there are " + addressesSnapshot.size + " addresses at the moment");
+      // console.log("there are " + addressesSnapshot.size + " addresses at the moment");
   }
 
 function Board() {
