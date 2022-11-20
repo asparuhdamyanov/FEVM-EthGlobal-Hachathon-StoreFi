@@ -9,13 +9,13 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY
 module.exports = {
     solidity: "0.8.17",
 
-    // defaultNetwork: "wallaby",
-    // networks: {
-    //   wallaby: {
-    //     url: "https://wallaby.node.glif.io/rpc/v0",
-    //     accounts: [PRIVATE_KEY],
-    //   }
-    //},
+     defaultNetwork: "wallaby",
+     networks: {
+       wallaby: {
+         url: "https://wallaby.node.glif.io/rpc/v0",
+         accounts: [PRIVATE_KEY],
+       }
+    },
     paths: {
         sources: "./contracts",
         tests: "./test",

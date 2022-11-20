@@ -4,6 +4,7 @@ require("hardhat-deploy-ethers");
 const ethers = require("ethers");
 const fa = require("@glif/filecoin-address");
 const util = require("util");
+const { JsonRpcProvider } = require("@ethersproject/providers");
 const request = util.promisify(require("request"));
 
 const DEPLOYER_PRIVATE_KEY = process.env.PRIVATE_KEY; // network.config.accounts[0];
@@ -33,7 +34,7 @@ async function callRpc(method, params) {
   return JSON.parse(res.body).result;
 }
 
-const deployer = new ethers.Wallet(DEPLOYER_PRIVATE_KEY, ethers.getDefaultProvider());
+const deployer = new ethers.Wallet(DEPLOYER_PRIVATE_KEY, new ethers.providers.JsonRpcProvider("https://wallaby.node.glif.io/rpc/v0"));
 
 module.exports = async ({ deployments }) => {
   const { deploy } = deployments;
@@ -45,7 +46,6 @@ module.exports = async ({ deployments }) => {
 
   console.log("Wallet Ethereum Address:", deployer.address);
   console.log("Wallet f4Address: ", f4Address)
-  console.log("Wallet provider: ", deployer.provider);
 
 
   // await deploy("SimpleCoin", {
@@ -82,13 +82,29 @@ module.exports = async ({ deployments }) => {
     log: true,
   });
 
-  await deploy("AuctionManager", {
-    from: deploy.address,
+  await deploy("Auction", {
+    from: deployer.address,
     args: [],
     maxPriorityFeePerGas: priorityFee,
     log: true
+  }).then(async (auction) => {
+    await deploy("AuctionManager", {
+      from: deployer.address,
+      args: [],
+      maxPriorityFeePerGas: priorityFee,
+      log: true
+    }).then(async (manager) => {
+      const managerContract = new ethers.Contract(manager.address, manager.abi, deployer);
+      // managerContract.populateTransaction.setupAuction(auction.address);
+      const populatedTrx = await deployer.populateTransaction(await managerContract.populateTransaction.setupAuction(auction.address));
+      // const signedTrx = await deployer.signTransaction(populatedTrx);
+      // console.log(signedTrx.hash);
+      // await (new UncheckedJsonRpcSigner("https://wallaby.node.glif.io/rpc/v0")).sendTransaction(signedTrx);
+      // await deployer.sendTransaction(signedTrx);
+      // await managerContract.setupAuction(auction.address /*, {gasLimit: 100000}*/);
+    });
   });
   };
 
 
-module.exports.tags = ["MinerAPI", "MarketAPI", "AuctionManager"];
+module.exports.tags = ["MinerAPI", "MarketAPI", "Auction", "AuctionManager"];
