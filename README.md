@@ -26,3 +26,6 @@ Seller invokes LotteryManager's create a Proxy from the UI.
 
 We used a Beacon Proxy Pattern, so we can create N amount of different Auctions
 
+## Start
+
+```yarn```
