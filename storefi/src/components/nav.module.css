@@ -1,3 +1,9 @@
 .navBar {
-    border:1px solid black;
+    display: flex;
+    justify-content: space-between;
+    box-shadow: 0 0 8px black;
+    padding-left: 20px;
+}
+Button {
+    box-shadow: 1px black;
 }
