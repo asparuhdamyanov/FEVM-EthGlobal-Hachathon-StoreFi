@@ -36,7 +36,7 @@ const ListingCreation = () => {
 
       const { runContractFunction: createNewAuction } = useWeb3Contract({
         abi: abi_Auction_Manager,
-        contractAddress: '0x0A84E9c547463B833d6c7B14592Ae300Da5a6539', // AUCTION MANAGER ADDRESS
+        contractAddress: '0x6d11Ad6e55dd70e9056534B77260f2B709bdbF3b', // AUCTION MANAGER ADDRESS
         functionName: "deployAuctionProxy",
         params: {   
             _biddingTime: endDate?.valueOf(),
