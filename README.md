@@ -28,4 +28,10 @@ We used a Beacon Proxy Pattern, so we can create N amount of different Auctions
 
 ## Start
 
-```yarn```
+```shell
+# run in the root folder filecoin hardhat project
+yarn
+# run frontend project
+npm install
+npm start
+```
