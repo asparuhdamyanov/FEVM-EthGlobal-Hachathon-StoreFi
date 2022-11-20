@@ -44,5 +44,5 @@ First, setup the private key of your deployer wallet in an environment variable 
 Then, in order to deploy and setup the contracts run:
 ```
 yarn hardhat deploy
-yarn hardhat setup-auction
+yarn hardhat setup-auction --manager <AuctionManager contract address> --auction <Auction contract address>
 ```

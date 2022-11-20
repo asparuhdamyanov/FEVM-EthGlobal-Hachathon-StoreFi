@@ -22,8 +22,10 @@ async function callRpc(method, params) {
 
 
 task("setup-auction", "Calls the simple coin Contract to read the amount of SimpleCoins owned by the account.")
+  .addParam("manager", "The address the AuctionManager contract")
+  .addParam("auction", "The address the Auction contract")
   .setAction(async (taskArgs) => {
-    const contractAddr = "0x0A84E9c547463B833d6c7B14592Ae300Da5a6539";
+    const contractAddr = taskArgs.manager;
     const networkId = network.name
     const managerContract = await ethers.getContractFactory("AuctionManager")
 
@@ -34,7 +36,7 @@ task("setup-auction", "Calls the simple coin Contract to read the amount of Simp
     const priorityFee = await callRpc("eth_maxPriorityFeePerGas");
 
     const simpleCoinContract = new ethers.Contract(contractAddr, managerContract.interface, signer)
-    let result = await simpleCoinContract.setupAuction("0x3C0C5B2Ae949523B6c9CE9c42835222B8B1f12A7", {maxPriorityFeePerGas: priorityFee});
+    let result = await simpleCoinContract.setupAuction(taskArgs.auction, {maxPriorityFeePerGas: priorityFee});
     console.log("Data is: ", result);
   })
 
