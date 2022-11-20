@@ -2,7 +2,7 @@
 
 ### The idea
 
-A decentralized Auction, where potential buyers place competitive bids for Filecoin storage.
+**A decentralized Auction provider, where potential buyers place competitive bids for Filecoin storage.**
 
 There are two participants: **Buyers** & **Sellers**
 
