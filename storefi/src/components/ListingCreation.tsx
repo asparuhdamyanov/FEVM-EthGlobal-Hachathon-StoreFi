@@ -1,52 +1,94 @@
-import React, {Component, JSXElementConstructor, ReactElement} from 'react';
+import React, {ChangeEvent, Component, JSXElementConstructor, ReactElement, useState} from 'react';
 import { Input, TextField, Button } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
+import { useMoralis, useWeb3Contract } from "react-moralis";
+
 
 
 
 import styles from './ListingCreation.module.css'
+import Moralis from 'moralis-v1/types';
+import { Windows } from 'web3uikit';
+import abi_Auction_Factory from "../constants/abi_Auction_Factory.json";
 
-function ListingCreation() {
-    const [value, setValue] = React.useState<Dayjs | null>(
-        dayjs('2014-08-18T21:11:54'),
+const ListingCreation = () => {
+
+    const { isAuthenticated, isWeb3Enabled, account } = useMoralis();
+
+      const [endDate, setEndDate] = useState<Dayjs | null>(
+        dayjs('2022-11-21T10:00:00'),
       );
 
-      const handleChange = (newValue: Dayjs | null) => {
-        setValue(newValue);
+      const handleNewEndDate = (newDate: Dayjs | null) => {
+        console.log(newDate);
+        setEndDate(newDate);
       };
+
+      const [startPrice, setStartPrice] = useState(0)
+
+      const handleNewPrice = (newPrice: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        console.log(newPrice.target.value);
+        setStartPrice(newPrice.target.value as unknown as number);
+      };
+
+      const { runContractFunction: createNewAuction } = useWeb3Contract({
+        abi: abi_Auction_Factory,
+        contractAddress: raffleAddress, // AUCTION FACTORY ADDRESS
+        functionName: "deployAuctionProxy",
+        params: {   
+            _biddingTime: endDate?.valueOf(),
+            _beneficiary: account,
+            _minimumBid: startPrice
+        },
+    })
+
+      async function createNewListing(startDate: dayjs.Dayjs | null, endDate: dayjs.Dayjs | null, startPrice: number): Promise<void> {
+        
+        if(endDate == null) {
+            window.alert("You have not entered an end date")
+            return
+        } else if(endDate.isBefore(Date.now())) {
+            window.alert("The ending date can not be in the past")
+            return
+        }
+    
+        if(endDate.isBefore(startDate)) {
+            window.alert("The ending date can not be before the starting date")
+            return
+        }
+        
+        if(startPrice < 0) {
+            window.alert("The starting price can not be negative")
+            return
+        }
+
+        if(!isWeb3Enabled) {
+            window.alert("You need to connect to a wallet.")
+            return
+        }
+
+        await createNewAuction({
+            // onComplete:
+            // onError:
+            onSuccess: handleSuccess,
+            onError: (error) => console.log(error),
+        })
+        
+    }
 
     return (
         <div className={styles.listingCreation}>
-            <label>New Listing:</label>
-            <div className = {styles.inputItem}>
-                <label>Name of the listing: </label>
-                <Input></Input>
-            </div>
-            <div>
-                <label>Starting date of the listing: </label>
-                <div className = {styles.inputItem}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DateTimePicker
-                            label="Date & Time picker"
-                            value={value}
-                            onChange={handleChange}
-                            renderInput={(params) => <TextField {...params} />}
-                        >
-                        </DateTimePicker>
-                    </LocalizationProvider>
-                </div>
-            </div>
             <div>
                 <label>Ending date of the listing: </label>
                 <div className = {styles.inputItem}>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DateTimePicker
                             label="Date & Time picker"
-                            value={value}
-                            onChange={handleChange}
+                            value={endDate}
+                            onChange={(newEndDate) => handleNewEndDate(newEndDate)}
                             renderInput={(params) => <TextField {...params} />}
                         >
                         </DateTimePicker>
@@ -55,15 +97,20 @@ function ListingCreation() {
             </div>
             <div>
                 <label>Starting price: </label>
-                <Input></Input>
+                <Input
+                    value={startPrice}
+                    onChange={(newPrice) => handleNewPrice(newPrice)}></Input>
             </div>
-            <div>
-                <label>Immediate buy price: </label>
-                <Input></Input>
-            </div>
-            <Button variant="outlined">Create</Button>
+            <Button 
+                variant="outlined"
+                onClick={() => createNewListing(startDate, endDate, startPrice)}>Create</Button>
         </div>
     );
 }
 
 export default ListingCreation;
+function handleSuccess() {
+    window.alert("Your listing has been created.")
+
+}
+

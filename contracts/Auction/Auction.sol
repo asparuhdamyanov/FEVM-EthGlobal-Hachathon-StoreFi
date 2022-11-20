@@ -117,6 +117,14 @@ contract Auction is Initializable {
         market.publish_deal(client, provider, highestbid / EPOCH_NUM);
     }
 
+    function MinimumBid() external view returns (uint256) {
+        return minimumBid;
+    }
+
+    function HighestBid() external view returns (uint256) {
+        return highestbid;
+    }
+
     function AuctionStartedTime() external view returns (uint256) {
         return auctionStartTime;
     }
