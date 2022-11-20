@@ -8,16 +8,6 @@ import './App.css';
 import ListingCreation from './components/ListingCreation';
 import Board from './components/Board';
 import Header from './components/Header';
-import {useLayoutEffect} from 'react';
-
-
-// const Wrapper = ({children: }) => {
-//   const location = useLocation();
-//   useLayoutEffect(() => {
-//     document.documentElement.scrollTo(0, 0);
-//   }, [location.pathname]);
-//   return children
-// } 
 
 function App() {
   return (
