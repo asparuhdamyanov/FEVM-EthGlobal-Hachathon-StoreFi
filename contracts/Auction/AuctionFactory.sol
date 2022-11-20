@@ -31,7 +31,8 @@ contract AuctionFactory is Ownable {
         uint256 _biddingTime,
         address payable _beneficiary,
         uint256 _minimumBid
-    ) external onlyOwner {
+    ) external {
+        //onlyOwner {
         address _latestAuctionProxy = latestAuctionProxy();
         if (_latestAuctionProxy != address(0x0) && !IAuction(_latestAuctionProxy).finished())
             revert OnlyOneAuctionAtTime();
