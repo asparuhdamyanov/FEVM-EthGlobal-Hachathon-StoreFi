@@ -14,15 +14,24 @@ contract AuctionManager is Ownable {
         address indexed previousImplementation,
         address indexed newImplementation
     );
-
+    event AuctionSetUP(address indexed beacon, address indexed factory);
     event AuctionOwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /// @notice Ownable contract used to manage the Auction system - the factory and the beacon contracts
     /// @param implementation_ The address of the Auction implementation that is initially used by the beacon
 
-    function setupAuction(address implementation_) external onlyOwner {
+    function setupAuction(address implementation_) external {
+        //onlyOwner {
         auctionBeacon = new AuctionBeacon(implementation_);
         auctionFactory = new AuctionFactory(address(auctionBeacon));
+        emit AuctionSetUP(address(auctionBeacon), address(auctionFactory));
+    }
+
+    function changeAuction(address beacon, address factory) external {
+        //onlyOwner {
+        auctionBeacon = AuctionBeacon(beacon);
+        auctionFactory = AuctionFactory(factory);
+        emit AuctionSetUP(address(auctionBeacon), address(auctionFactory));
     }
 
     /// @notice Changes the address of the logic/implementation contract used in the Auction system
@@ -39,7 +48,8 @@ contract AuctionManager is Ownable {
         uint256 _biddingTime,
         address payable _beneficiary,
         uint256 _minimumBid
-    ) external onlyOwner {
+    ) external {
+        //onlyOwner {
         auctionFactory.deployAuctionProxy(_biddingTime, _beneficiary, _minimumBid);
     }
 
