@@ -7,6 +7,7 @@ import { Input, Button, Grid } from "@mui/material";
 import styles from "./Board.module.css";
 import { useWeb3Contract, Web3ExecuteFunctionParameters } from "react-moralis";
 
+import abi_Auction_Manager from "../constants/abi_Auction_Manager.json"
 import abi_Auction_Factory from "../constants/abi_Auction_Factory.json";
 import abi_Auction from "../constants/abi_Auction_Factory.json";
 

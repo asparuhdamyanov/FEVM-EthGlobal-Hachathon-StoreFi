@@ -12,7 +12,7 @@ import { useMoralis, useWeb3Contract } from "react-moralis";
 import styles from './ListingCreation.module.css'
 import Moralis from 'moralis-v1/types';
 import { Windows } from 'web3uikit';
-import abi_Auction_Factory from "../constants/abi_Auction_Factory.json";
+import abi_Auction_Manager from "../constants/abi_Auction_Manager.json";
 
 const ListingCreation = () => {
 
@@ -35,8 +35,8 @@ const ListingCreation = () => {
       };
 
       const { runContractFunction: createNewAuction } = useWeb3Contract({
-        abi: abi_Auction_Factory,
-        contractAddress: raffleAddress, // AUCTION FACTORY ADDRESS
+        abi: abi_Auction_Manager,
+        contractAddress: '0x0A84E9c547463B833d6c7B14592Ae300Da5a6539', // AUCTION MANAGER ADDRESS
         functionName: "deployAuctionProxy",
         params: {   
             _biddingTime: endDate?.valueOf(),
@@ -45,18 +45,13 @@ const ListingCreation = () => {
         },
     })
 
-      async function createNewListing(startDate: dayjs.Dayjs | null, endDate: dayjs.Dayjs | null, startPrice: number): Promise<void> {
+      async function createNewListing(endDate: dayjs.Dayjs | null, startPrice: number): Promise<void> {
         
         if(endDate == null) {
             window.alert("You have not entered an end date")
             return
         } else if(endDate.isBefore(Date.now())) {
             window.alert("The ending date can not be in the past")
-            return
-        }
-    
-        if(endDate.isBefore(startDate)) {
-            window.alert("The ending date can not be before the starting date")
             return
         }
         
@@ -69,6 +64,9 @@ const ListingCreation = () => {
             window.alert("You need to connect to a wallet.")
             return
         }
+
+        // await setUpAuction({
+        // })
 
         await createNewAuction({
             // onComplete:
@@ -103,7 +101,7 @@ const ListingCreation = () => {
             </div>
             <Button 
                 variant="outlined"
-                onClick={() => createNewListing(startDate, endDate, startPrice)}>Create</Button>
+                onClick={() => createNewListing(endDate, startPrice)}>Create</Button>
         </div>
     );
 }
@@ -111,6 +109,5 @@ const ListingCreation = () => {
 export default ListingCreation;
 function handleSuccess() {
     window.alert("Your listing has been created.")
-
 }
 
