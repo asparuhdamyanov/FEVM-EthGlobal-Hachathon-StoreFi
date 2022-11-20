@@ -16,12 +16,13 @@ interface Listing {
   address: string;
   startDate: number;
   endDate: number;
+  startBid: number;
   currentBestBid: number;
 }
 
 const boardListings: Listing[] = [];
 
-async function Board() {
+function Board() {
 
     const { runContractFunction: fetchAddresses } = useWeb3Contract({
       abi: abi_Auction_Factory,
@@ -30,52 +31,62 @@ async function Board() {
       params: {},
   })
 
-  const addresses: string[] = await fetchAddresses() as unknown as string[];
+  const addresses: string[] = fetchAddresses() as unknown as string[];
 
   
 
-  addresses.forEach(x => {
+  addresses.forEach(async x => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const { runContractFunction: fetchStartDate, } = useWeb3Contract({
       abi: abi_Auction,
-      contractAddress: x, // AUCTION FACTORY ADDRESS
+      contractAddress: x, 
       functionName: "AuctionStartedTime",
       params: {},
     })
 
     const { runContractFunction: fetchEndDate, } = useWeb3Contract({
       abi: abi_Auction,
-      contractAddress: x, // AUCTION FACTORY ADDRESS
+      contractAddress: x, 
       functionName: "AuctionEndedTime",
       params: {},
     })
 
     const { runContractFunction: fetchStartBid, } = useWeb3Contract({
       abi: abi_Auction,
-      contractAddress: x, // AUCTION FACTORY ADDRESS
+      contractAddress: x, 
       functionName: "MinimumBid",
       params: {},
     })
 
     const { runContractFunction: fetchHighestBid, } = useWeb3Contract({
       abi: abi_Auction,
-      contractAddress: x, // AUCTION FACTORY ADDRESS
+      contractAddress: x, 
       functionName: "HighestBid",
       params: {},
     })
 
+    const startDate = await fetchStartDate as unknown as number;
+    const endDate = await fetchEndDate as unknown as number;
+    const startBid = await fetchStartBid as unknown as number;
+    const HighestBid = await fetchHighestBid as unknown as number;
 
+    const newAddress: Listing = {
+      address: x,
+      startDate: startDate,
+      endDate: endDate,
+      startBid: startBid,
+      currentBestBid: HighestBid
+    }
+
+    boardListings.push(newAddress)
   })
 
   return (
     <Grid className="container-grid" container spacing={1}>
-      {boardListing.map((item, index) => {
+      {boardListings.map((item, index) => {
         return (
           <Grid item xs={12} sm={6} md={3} key={index}>
             <div className={styles.listingCreation}>
-              <div>
-                <label>{item.name}</label>
-              </div>
               <div>
                 <label>Starting date: {item.startDate}</label>
               </div>
@@ -83,7 +94,10 @@ async function Board() {
                 <label>End date: {item.endDate}</label>
               </div>
               <div>
-                <label>Current best bid: {item.startingPrice}</label>
+                <label>Starting bid: {item.startBid}</label>
+              </div>
+              <div>
+                <label>Current best bid: {item.currentBestBid}</label>
               </div>
               <div>
                 <label>Bid for price: </label>

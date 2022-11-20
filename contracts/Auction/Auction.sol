@@ -133,14 +133,6 @@ contract Auction is Initializable {
         return auctionEndTime;
     }
 
-    function getHighestBid() external view returns (uint256) {
-        return highestbid;
-    }
-
-    function getStartingBid() external view returns (uint256) {
-        return minimumBid;
-    }
-
     /* @notice Tracks whether the sale has finished
      * @return bool A boolean showing whether the sale has finished
      */
