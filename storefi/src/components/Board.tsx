@@ -10,9 +10,9 @@ import { useWeb3Contract, Web3ExecuteFunctionParameters } from "react-moralis";
 import abi_Auction_Manager from "../constants/abi_Auction_Manager.json"
 import abi_Auction_Factory from "../constants/abi_Auction_Factory.json";
 import abi_Auction from "../constants/abi_Auction_Factory.json";
-import {useEffect, useState} from "react"
 
 import { ResolveCallOptions } from "react-moralis/lib/hooks/internal/_useResolveAsyncCall";
+import { useEffect } from "react";
 
 interface Listing {
   address: string;
@@ -21,70 +21,84 @@ interface Listing {
   startBid: number;
   currentBestBid: number;
 }
-
-const boardListings: Listing[] = [];
+let start:boolean = false;
 
 function Board() {
 
-    const { runContractFunction: fetchAddresses } = useWeb3Contract({
-      abi: abi_Auction_Factory,
-      contractAddress: '0x36897Cb174D65eD8D3478d5E3027C8d9C4033ae3', // AUCTION FACTORY ADDRESS
-      functionName: "deployedAuctionProxies",
-      params: {},
+  let addresses:any;
+  const boardListings: Listing[] = [];
+  
+
+  const { runContractFunction: fetchAddresses } = useWeb3Contract({
+    abi: abi_Auction_Factory,
+    contractAddress: '0x36897Cb174D65eD8D3478d5E3027C8d9C4033ae3', // AUCTION FACTORY ADDRESS
+    functionName: "deployedAuctionProxies",
+    params: {},
   })
 
-  const addresses: string[] = fetchAddresses() as unknown as string[];
+  async function AddressFormer(listingAddress: string) {
+    const { runContractFunction: fetchStartDate, } = useWeb3Contract({
+      abi: abi_Auction,
+      contractAddress: listingAddress, 
+      functionName: "AuctionStartedTime",
+      params: {},
+    })
 
-  useEffect(() => {
-    await fetchAddresses() => {
-      addresses.forEach(async (x) => {
+    const { runContractFunction: fetchEndDate, } = useWeb3Contract({
+      abi: abi_Auction,
+      contractAddress: listingAddress, 
+      functionName: "AuctionEndedTime",
+      params: {},
+    })
+
+    const { runContractFunction: fetchStartBid, } = useWeb3Contract({
+      abi: abi_Auction,
+      contractAddress: listingAddress, 
+      functionName: "MinimumBid",
+      params: {},
+    })
+
+    const { runContractFunction: fetchHighestBid, } = useWeb3Contract({
+      abi: abi_Auction,
+      contractAddress: listingAddress, 
+      functionName: "HighestBid",
+      params: {},
+    })
+
+    const startDate = await fetchStartDate as unknown as number;
+    const endDate = await fetchEndDate as unknown as number;
+    const startBid = await fetchStartBid as unknown as number;
+    const HighestBid = await fetchHighestBid as unknown as number;
+
+    const newAddress: Listing = {
+      address: listingAddress,
+      startDate: startDate,
+      endDate: endDate,
+      startBid: startBid,
+      currentBestBid: HighestBid
+    }
+
+    return newAddress;
+  }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+    const Shit = async () => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    addresses = (await fetchAddresses()) as unknown as string[];
+    console.log(addresses)
+    addresses.forEach(async (listingAddress: string) => {
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        const { runContractFunction: fetchStartDate, } = useWeb3Contract({
-          abi: abi_Auction,
-          contractAddress: x, 
-          functionName: "AuctionStartedTime",
-          params: {},
-        })
-    
-        const { runContractFunction: fetchEndDate, } = useWeb3Contract({
-          abi: abi_Auction,
-          contractAddress: x, 
-          functionName: "AuctionEndedTime",
-          params: {},
-        })
-    
-        const { runContractFunction: fetchStartBid, } = useWeb3Contract({
-          abi: abi_Auction,
-          contractAddress: x, 
-          functionName: "MinimumBid",
-          params: {},
-        })
-    
-        const { runContractFunction: fetchHighestBid, } = useWeb3Contract({
-          abi: abi_Auction,
-          contractAddress: x, 
-          functionName: "HighestBid",
-          params: {},
-        })
-    
-        const startDate = await fetchStartDate as unknown as number;
-        const endDate = await fetchEndDate as unknown as number;
-        const startBid = await fetchStartBid as unknown as number;
-        const HighestBid = await fetchHighestBid as unknown as number;
-    
-        const newAddress: Listing = {
-          address: x,
-          startDate: startDate,
-          endDate: endDate,
-          startBid: startBid,
-          currentBestBid: HighestBid
-        }
-    
+        let newAddress: Listing = await AddressFormer(listingAddress)
         boardListings.push(newAddress)
       })
-    }
-  })
 
+      return <> </>;
+    }
+
+    if(!start) {
+      Shit();
+      start = true;
+    }
 
 
   return (
