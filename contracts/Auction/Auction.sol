@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
-
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "../filecoinMockAPIs/MarketAPI.sol";
 
 error TransactionFailed();
 
-contract Auction {
+contract Auction is Initializable {
     address constant owner = 0x528b5F26Da55f5d94e9522F9c8752c5817B35295;
     address constant marketApiAddress = 0x528b5F26Da55f5d94e9522F9c8752c5817B35295;
     // for how many epochs will the storage be used
     // for now it is hard coded, but could also be a part of the auction
     // it is used to calculate the price per epoch
-    uint constant EPOCH_NUM = 545150 - 25245;
+    uint256 constant EPOCH_NUM = 545150 - 25245;
     address payable public beneficiary;
     uint256 public auctionEndTime;
     uint256 public auctionStartTime;
@@ -32,11 +33,11 @@ contract Auction {
 
     // event Bid(address indexed bidder);
 
-    constructor(
+    function initialize(
         uint256 _biddingTime,
         address payable _beneficiary,
-        uint256 _minimumBid,
-    ) {
+        uint256 _minimumBid
+    ) external initializer {
         beneficiary = _beneficiary;
         auctionEndTime = block.timestamp + _biddingTime;
         minimumBid = _minimumBid;
@@ -85,9 +86,8 @@ contract Auction {
         return true;
     }
 
-
     function forceEndAuction() public {
-        require (msg.sender == owner, "You are not allowed to force end the aution!");
+        require(msg.sender == owner, "You are not allowed to force end the aution!");
         require(
             block.timestamp > auctionEndTime + 3 days,
             "The Auction Cannot End Before The Specified Time"
@@ -127,6 +127,10 @@ contract Auction {
 
     function getHighestBid() external view returns (uint256) {
         return highestbid;
+    }
+
+    function getStartingBid() external view returns (uint256) {
+        return minimumBid;
     }
 
     /* @notice Tracks whether the sale has finished
