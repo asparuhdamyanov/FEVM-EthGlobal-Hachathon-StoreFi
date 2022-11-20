@@ -96,7 +96,7 @@ module.exports = async ({ deployments }) => {
     }).then(async (manager) => {
       const managerContract = new ethers.Contract(manager.address, manager.abi, deployer);
       // managerContract.populateTransaction.setupAuction(auction.address);
-      const populatedTrx = await deployer.populateTransaction(await managerContract.populateTransaction.setupAuction(auction.address));
+      // const populatedTrx = await deployer.populateTransaction(await managerContract.populateTransaction.setupAuction(auction.address));
       // const signedTrx = await deployer.signTransaction(populatedTrx);
       // console.log(signedTrx.hash);
       // await (new UncheckedJsonRpcSigner("https://wallaby.node.glif.io/rpc/v0")).sendTransaction(signedTrx);

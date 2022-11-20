@@ -29,3 +29,12 @@ We used a Beacon Proxy Pattern, so we can create N amount of different Auctions
 ## Start
 
 ```yarn```
+
+## Deploying the contracts
+First, setup the private key of your deployer wallet in an environment variable called `PRIVATE_KEY`.
+
+Then, in order to deploy and setup the contracts run:
+```
+yarn hardhat deploy
+yarn hardhat setup-auction
+```
