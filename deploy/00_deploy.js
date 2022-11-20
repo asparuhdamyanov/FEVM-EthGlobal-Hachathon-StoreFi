@@ -6,7 +6,7 @@ const fa = require("@glif/filecoin-address");
 const util = require("util");
 const request = util.promisify(require("request"));
 
-const DEPLOYER_PRIVATE_KEY = network.config.accounts[0];
+const DEPLOYER_PRIVATE_KEY = process.env.PRIVATE_KEY; // network.config.accounts[0];
 
 function hexToBytes(hex) {
   for (var bytes = [], c = 0; c < hex.length; c += 2)
@@ -33,7 +33,7 @@ async function callRpc(method, params) {
   return JSON.parse(res.body).result;
 }
 
-const deployer = new ethers.Wallet(DEPLOYER_PRIVATE_KEY);
+const deployer = new ethers.Wallet(DEPLOYER_PRIVATE_KEY, ethers.getDefaultProvider());
 
 module.exports = async ({ deployments }) => {
   const { deploy } = deployments;
@@ -45,18 +45,19 @@ module.exports = async ({ deployments }) => {
 
   console.log("Wallet Ethereum Address:", deployer.address);
   console.log("Wallet f4Address: ", f4Address)
+  console.log("Wallet provider: ", deployer.provider);
 
 
-  await deploy("SimpleCoin", {
-    from: deployer.address,
-    args: [],
-    // since it's difficult to estimate the gas before f4 address is launched, it's safer to manually set
-    // a large gasLimit. This should be addressed in the following releases.
-    // since Ethereum's legacy transaction format is not supported on FVM, we need to specify
-    // maxPriorityFeePerGas to instruct hardhat to use EIP-1559 tx format
-    maxPriorityFeePerGas: priorityFee,
-    log: true,
-  });
+  // await deploy("SimpleCoin", {
+  //   from: deployer.address,
+  //   args: [],
+  //   // since it's difficult to estimate the gas before f4 address is launched, it's safer to manually set
+  //   // a large gasLimit. This should be addressed in the following releases.
+  //   // since Ethereum's legacy transaction format is not supported on FVM, we need to specify
+  //   // maxPriorityFeePerGas to instruct hardhat to use EIP-1559 tx format
+  //   maxPriorityFeePerGas: priorityFee,
+  //   log: true,
+  // });
 
   await deploy("MinerAPI", {
     from: deployer.address,
@@ -67,6 +68,7 @@ module.exports = async ({ deployments }) => {
     // maxPriorityFeePerGas to instruct hardhat to use EIP-1559 tx format
     maxPriorityFeePerGas: priorityFee,
     log: true,
+    
   });
 
   await deploy("MarketAPI", {
@@ -79,7 +81,14 @@ module.exports = async ({ deployments }) => {
     maxPriorityFeePerGas: priorityFee,
     log: true,
   });
-};
+
+  await deploy("AuctionManager", {
+    from: deploy.address,
+    args: [],
+    maxPriorityFeePerGas: priorityFee,
+    log: true
+  });
+  };
 
 
-module.exports.tags = ["SimpleCoin", "MinerAPI", "MarketAPI"];
+module.exports.tags = ["MinerAPI", "MarketAPI", "AuctionManager"];

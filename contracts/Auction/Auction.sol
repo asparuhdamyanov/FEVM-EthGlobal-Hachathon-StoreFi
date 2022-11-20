@@ -6,8 +6,8 @@ import "../filecoinMockAPIs/MarketAPI.sol";
 error TransactionFailed();
 
 contract Auction {
-    address owner;
-    address marketApiAddress;
+    address constant owner = 0x528b5F26Da55f5d94e9522F9c8752c5817B35295;
+    address constant marketApiAddress = 0x528b5F26Da55f5d94e9522F9c8752c5817B35295;
     // for how many epochs will the storage be used
     // for now it is hard coded, but could also be a part of the auction
     // it is used to calculate the price per epoch
@@ -36,15 +36,11 @@ contract Auction {
         uint256 _biddingTime,
         address payable _beneficiary,
         uint256 _minimumBid,
-        address marketAddr,
-        address ownerAddr
     ) {
         beneficiary = _beneficiary;
         auctionEndTime = block.timestamp + _biddingTime;
         minimumBid = _minimumBid;
         auctionStartTime = block.timestamp;
-        marketApiAddress = marketAddr;
-        owner = ownerAddr;
         //auctionTimeDifference = auctionEndTime + 5 minutes;
     }
 
